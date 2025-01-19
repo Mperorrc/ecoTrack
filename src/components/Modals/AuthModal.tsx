@@ -1,23 +1,17 @@
-"use client";
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { IoClose } from 'react-icons/io5';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { authModalState } from '@/atoms/authModalAtom';
+import Signup from './Signup';
+import SignIn from './SignIn';
+import ResetPassword from './ResetPassword';
 
 
 const AuthModal:React.FC = () => {
-    const [isMounted, setIsMounted] = useState(false);
-
-    // Always call hooks in the same order, even before the component is mounted
-    const authModal = useRecoilValue(authModalState); // Use it unconditionally
+    
+    const authModal = useRecoilValue(authModalState);
     const closeModal = useCloseModal();
-
-    useEffect(() => {
-        setIsMounted(true); // Mark component as mounted
-    }, []);
-
-    // Don't render the component during SSR, only after mounting
-    if (!isMounted) return null;
+    console.log( "AUTH: " + authModal?.type)
     return(
         <>
             <div className='absolute top-0 left-0 w-full h-full flex items-center
@@ -30,8 +24,8 @@ const AuthModal:React.FC = () => {
                 <div className='relative w-full h-full mx-auto flex items-center
                     justify-center'
                 >
-                    <div className='bg-white rounded-lg shadow relative w-full
-                        bg-gradient-to-b from-brand-orange to-slate-900 mx-6'
+                    <div className='bg-gradient-to-b from-pink-900 to-slate-900 ease-in-out rounded-lg shadow relative w-full
+                        mx-6'
                     >
                         <div className='flex justify-end p-2'>
                             <button
@@ -44,9 +38,9 @@ const AuthModal:React.FC = () => {
                                 <IoClose className='h-5 w-5'/>
                             </button>
                         </div>
-                        {authModal?.type === "login" && <div>HI</div>}
-                        {authModal?.type === "register" && <div>HI</div>}
-                        {authModal?.type === "forgotPassword" && <div>HI</div>}
+                        {authModal.type === "login" && <SignIn />}
+                        {authModal.type === "register" && <Signup />}
+                        {authModal.type === "forgotPassword" && <ResetPassword />}
                     </div>
                 </div>
             </div>
