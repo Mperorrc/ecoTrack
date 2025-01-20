@@ -42,7 +42,8 @@ const SignIn:React.FC = () => {
             toast.success("User Logged in Successfully", {position:"top-center", autoClose:3000, theme:"dark"});
             closeAuthModal();
         } catch (error:any) {
-            toast.error(error.message, {position:"top-center", autoClose:3000, theme:"dark"});
+            if(error?.message == "Login Failed") toast.error("Invalid Username or Password", {position:"top-center", autoClose:3000, theme:"dark"});
+            else toast.error("An unexpected error occured!", {position:"top-center", autoClose:3000, theme:"dark"});
         }
     }
 
