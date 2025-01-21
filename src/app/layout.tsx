@@ -3,6 +3,7 @@ import Head from "next/head";
 import "./globals.css";
 import { RecoilRoot } from "recoil";
 import { ToastContainer } from "react-toastify";
+import Navbar from "@/components/Navbar/Navbar";
 
 export default function RootLayout({
   children,
@@ -20,9 +21,10 @@ export default function RootLayout({
             <meta name="description" content="Track you carbon footprint" />
         </Head>
       <html lang="en">
-        <body>
+        <body className=" bg-[#121212]">
           <ToastContainer />
           <RecoilRoot>
+            <Navbar/>
             {children}
           </RecoilRoot>
         </body>

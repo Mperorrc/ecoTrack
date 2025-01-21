@@ -7,6 +7,7 @@ import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 import { auth } from '@/firebase/firebase';
 import {toast} from "react-toastify";
 import { FiLogOut } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
 
 type NavbarProps = {
     
@@ -16,6 +17,7 @@ const Navbar:React.FC<NavbarProps> = () => {
     const setAuthModalstate = useSetRecoilState(authModalState);
     const [user,loading] = useAuthState(auth);
     const [signOut] = useSignOut(auth);
+    const router = useRouter();
 
     const handleClick = ()=>{
         setAuthModalstate((prev) => ({...prev, isOpen: true}));
@@ -25,9 +27,19 @@ const Navbar:React.FC<NavbarProps> = () => {
     const handleLogout = async()=>{
         try {
             await signOut();
+            router.push("/");
             toast.success("User Logged out", {position:"top-center", autoClose:3000, theme:"dark"});
         } catch (error:any) {
             toast.error(error.message, {position:"top-center", autoClose:3000, theme:"dark"});
+        }
+    }
+
+    const handleFootprintNavigation = ()=>{
+        if(user?.uid){
+            router.push("/footprint");
+        }
+        else{
+            handleClick();
         }
     }
 
@@ -38,24 +50,24 @@ const Navbar:React.FC<NavbarProps> = () => {
             </div>
             
             <div className="flex justify-center gap-x-4 basis-1/2 flex-1 items-center">
-                <Link 
-                    href={"/"} 
+                <div 
+                    onClick={handleFootprintNavigation}
                     className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base bg-gradient-to-r from-purple-600 via-blue-900 to-pink-900 text-white rounded-xl py-2"
                 >
                     Chatbot
-                </Link>
-                <Link 
-                    href={"/"} 
+                </div>
+                <div 
+                    onClick={handleFootprintNavigation}
                     className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base bg-gradient-to-r from-purple-600 via-blue-900 to-pink-900 text-white rounded-xl py-2"
                 >
                     Add Travels
-                </Link>
-                <Link 
-                    href={"/"} 
+                </div>
+                <div 
+                    onClick={handleFootprintNavigation}
                     className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base bg-gradient-to-r from-purple-600 via-blue-900 to-pink-900 text-white rounded-xl py-2"
                 >
-                    Add Footprint
-                </Link>
+                    Your Footprint
+                </div>
                 {!loading  && user? (
                     <div 
                         className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base py-2 text-white overflow-visible" 

@@ -129,9 +129,9 @@ export default function Home() {
   
   return (
     <div>
-      <Navbar/>
+      {/* <Navbar/> */}
       {authModal.isOpen && <AuthModal/>}
-      <div className="text-white h-[92vh]  overflow-y-auto  font-bold bg-[#121212] scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-scroll-thumb scrollbar-track-scroll-track">
+      <div className="text-white h-[92vh]  overflow-y-auto  font-bold scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-scroll-thumb scrollbar-track-scroll-track">
         <div className="w-full mt-[40px] flex text-center items-center justify-center p-[2%] text-4xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-600 to-green-300 ">
           Track your carbon foorprint better with EcoTrack
         </div>
