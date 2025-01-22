@@ -1,4 +1,6 @@
 "use client"
+
+import computeCarbonFootprint from '@/components/ComputeCarbonFootprint/computeCarbonFootprint';
 import { auth, firestore } from '@/firebase/firebase';
 import { addDoc, collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
@@ -9,14 +11,39 @@ type pageProps = {
     
 };
 
+type FootprintDetails = {
+    month: string;
+    year: number;
+    electricityUnits: number;
+    renwableElectricityPercentage: number;
+    electricitysplit: number;
+    lpg: number;
+    naturalGas: number;
+    cookingOil: number;
+    fuelSplit: number;
+    carDistance: number;
+    carFuelType: "Petrol" | "Diesel" | "CNG" | "LPG" | "Electricity";
+    carPoolPercentage: number;
+    carpoolSplit: number;
+    bikeDistance: number;
+    bikeFuelType: "Petrol" | "Diesel" | "CNG" | "LPG" | "Electricity";
+    bikePoolPercentage: number;
+    bikepoolSplit: number;
+    busDistance: number;
+    trainDistance: number;
+    autoDistance: number;
+    autoSplit: number;
+    airTravelDistance: number;
+    airMode: "Economy" | "Premium Economy" | "Business" | "First";
+};
+
 const page:React.FC<pageProps> = () => {
     
-    const [newFootprintDetails, setNewFootprintDetails] = useState({
+    const [newFootprintDetails, setNewFootprintDetails] = useState<FootprintDetails>({
         month: "January",
         year: 2000,
         electricityUnits: 0,
         renwableElectricityPercentage: 0,
-        renewableFuelPercentage: 0,
         electricitysplit:1,
         lpg: 0,
         naturalGas:0,
@@ -25,76 +52,46 @@ const page:React.FC<pageProps> = () => {
         carDistance:0,
         carFuelType:"Petrol",
         carPoolPercentage:0,
-        carpoolSplit:0,  
+        carpoolSplit:1,  
         bikeDistance:0,
         bikeFuelType:"Petrol",
         bikePoolPercentage:0,
-        bikepoolSplit:0,
+        bikepoolSplit:1,
         busDistance:0,
         trainDistance:0,
         autoDistance:0,
-        autoSplit:0,  
+        autoSplit:1,  
         airTravelDistance:0,
         airMode:"Economy",
     });
 
+    const [loadDataprocessing,setLoadDataProcessing] = useState(false);
+    const [calculateDataprocessing,setCalculateDataProcessing] = useState(false);
+    const [saveDataprocessing,setSaveDataProcessing] = useState(false);
+
     const [user,loading] = useAuthState(auth);
 
-    const handleSave = async function(){
-
-        if(newFootprintDetails.year<2000){
-            toast.error("Footprint Data can only be stored post Jan 2000", {position:"top-center", toastId:"signUpLoadingToast" ,autoClose:2000, theme:"dark"});
-            return;
-        }
-
-        if(!user?.uid){
-            toast.error("User Logged Out! Please log in again", {position:"top-center", toastId:"signUpLoadingToast" ,autoClose:2000, theme:"dark"});
-            return;
-        }
-        try {
-            console.log(newFootprintDetails);
-            const querySnapshot = await getDocs(
-                query(
-                    collection(firestore, "FOOTPRINT_DATA"),
-                    where("user_uid", "==", user.uid),
-                    where("footprintDetails.month", "==", newFootprintDetails.month),
-                    where("footprintDetails.year", "==", newFootprintDetails.year)
-                )
-            );
-            console.log(querySnapshot?.docs?.length)
-            if (querySnapshot?.docs?.length) {
-                console.log("old");
-                const existingDoc = querySnapshot.docs[0];
-                const docRef = doc(firestore, "FOOTPRINT_DATA", existingDoc.id);
-    
-                await updateDoc(docRef, {
-                    "footprintDetails": newFootprintDetails,
-                    "updatedAt": Date.now(),
-                });
-            }
-            else{
-                console.log("new");
-                const monthlyCarbonFootprintData = {
-                    user_uid: user.uid,
-                    footprintDetails: newFootprintDetails,
-                    createdAt: Date.now(),
-                    updatedAt: Date.now(),
-                }
-                
-                await addDoc(collection(firestore, "FOOTPRINT_DATA"), monthlyCarbonFootprintData);
-            }
-            toast.success(`Carbon footprint details of ${newFootprintDetails.month} ${newFootprintDetails.year} were updated`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
-        } catch (error:any) {
-            toast.error("Couldn't save the carbon footprint Data", {position:"top-center", autoClose:2000, theme:"dark"});
-            console.log(error)
-        }
+    const handleCalculate = async function(){
+        if(loadDataprocessing || saveDataprocessing || calculateDataprocessing) return;
+        setCalculateDataProcessing(true);
+        const carbonFootprint = computeCarbonFootprint(
+            newFootprintDetails
+        );
+        
+        const roundedCarbonFootprint = parseFloat(carbonFootprint.toFixed(2));
+        toast.dismiss();
+        toast.success(`Carbon footprint Output: ${roundedCarbonFootprint}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 4000, theme: "dark" });
+        setCalculateDataProcessing(false);
     }
 
     const handleLoadData = async function(){
+        if(loadDataprocessing || saveDataprocessing || calculateDataprocessing) return;
+        toast.dismiss();
         if(!user?.uid){
             toast.error("User Logged Out! Please log in again", {position:"top-center", toastId:"signUpLoadingToast" ,autoClose:2000, theme:"dark"});
             return;
         }
+        setLoadDataProcessing(true);
         try {
             console.log(newFootprintDetails);
             const querySnapshot = await getDocs(
@@ -120,6 +117,64 @@ const page:React.FC<pageProps> = () => {
             toast.error("Couldn't save the carbon footprint Data", {position:"top-center", autoClose:2000, theme:"dark"});
             console.log(error)
         }
+        setLoadDataProcessing(false);
+    }
+
+    const handleSave = async function(){
+        if(loadDataprocessing || saveDataprocessing || calculateDataprocessing) return;
+        toast.dismiss();
+        if(!user?.uid){
+            toast.error("User Logged Out! Please log in again", {position:"top-center", toastId:"signUpLoadingToast" ,autoClose:2000, theme:"dark"});
+            return;
+        }
+        setSaveDataProcessing(true);
+        const carbonFootprint = computeCarbonFootprint(
+            newFootprintDetails
+        );
+
+        const roundedCarbonFootprint = parseFloat(carbonFootprint.toFixed(2));
+        
+        console.log(roundedCarbonFootprint)
+        
+        try {
+            const querySnapshot = await getDocs(
+                query(
+                    collection(firestore, "CARBON_FOOTPRINT_USER_DATA"),
+                    where("user_uid", "==", user.uid),
+                    where("footprintDetails.month", "==", newFootprintDetails.month),
+                    where("footprintDetails.year", "==", newFootprintDetails.year)
+                )
+            );
+            console.log(querySnapshot?.docs?.length)
+            if (querySnapshot?.docs?.length) {
+                console.log("old");
+                const existingDoc = querySnapshot.docs[0];
+                const docRef = doc(firestore, "CARBON_FOOTPRINT_USER_DATA", existingDoc.id);
+    
+                await updateDoc(docRef, {
+                    "footprintValue": roundedCarbonFootprint,
+                    "updatedAt": Date.now(),
+                });
+            }
+            else{
+                console.log("new");
+                const carbonFootprintData = {
+                    user_uid: user.uid,
+                    footprintDetails: newFootprintDetails,
+                    footprintValue: roundedCarbonFootprint,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                }
+                
+                await addDoc(collection(firestore, "CARBON_FOOTPRINT_USER_DATA"), carbonFootprintData);
+            }
+            toast.success(`Carbon footprint Output in ${newFootprintDetails.month} ${newFootprintDetails.year}: ${roundedCarbonFootprint}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
+        } catch (error:any) {
+            toast.error("Couldn't save the carbon footprint Value", {position:"top-center", autoClose:2000, theme:"dark"});
+            console.log(error)
+        }
+        setSaveDataProcessing(false);
+
     }
 
     useEffect(() => {
@@ -170,17 +225,19 @@ const page:React.FC<pageProps> = () => {
                     />
                 </div>
                 <div className="hover:cursor-pointer ml-[20px] w-[100px] flex items-center justify-center sm:text-sm md:text-base bg-gradient-to-r from-blue-900 to-purple-950  text-white rounded-xl py-2"
-                    onClick={handleSave}   
+                    onClick={handleCalculate}   
                 >
-                    Save
+                    {!calculateDataprocessing? "Calculate":"Calculating"}
                 </div>
-                <div className="hover:cursor-pointer ml-[20px] w-[100px] flex items-center justify-center sm:text-sm md:text-base bg-gradient-to-r from-blue-900 to-purple-950  text-white rounded-xl py-2">
-                    Submit
+                <div className="hover:cursor-pointer ml-[20px] w-[100px] flex items-center justify-center sm:text-sm md:text-base bg-gradient-to-r from-blue-900 to-purple-950  text-white rounded-xl py-2"
+                    onClick={handleSave}
+                >
+                    {!saveDataprocessing? "Save":"Saving..."}
                 </div>
                 <div className="hover:cursor-pointer ml-[20px] w-[100px] flex items-center justify-center sm:text-sm md:text-base bg-gradient-to-r from-blue-900 to-purple-950  text-white rounded-xl py-2"
                     onClick={handleLoadData}  
                 >
-                    Load data
+                    {!loadDataprocessing? "Load Data":"Loading..."}
                 </div>
             </div>
             <div className='grid-container w-full'>
@@ -247,7 +304,7 @@ const page:React.FC<pageProps> = () => {
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
                                         if (Number(target.value) > 100) target.value = "100";
-                                        if (Number(target.value) < 0) target.value = "0";
+                                        if (Number(target.value) < 1) target.value = "1";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, electricitysplit: Number(target.value)}))
                                     }}
@@ -347,7 +404,7 @@ const page:React.FC<pageProps> = () => {
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
                                         if (Number(target.value) > 100) target.value = "100";
-                                        if (Number(target.value) < 0) target.value = "0";
+                                        if (Number(target.value) < 1) target.value = "1";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, fuelSplit: Number(target.value)}))
                                     }}
@@ -399,7 +456,7 @@ const page:React.FC<pageProps> = () => {
                                     className="m-[10px] p-[5px] border border-gray-400 rounded bg-black text-white"
                                     value={newFootprintDetails.carFuelType}
                                     onChange={(e) => {
-                                        setNewFootprintDetails(prev=>({...prev, carFuelType: e.target.value}))
+                                        setNewFootprintDetails(prev=>({...prev, carFuelType: e.target.value as "Petrol" | "Diesel" | "CNG" | "LPG" | "Electricity"}))
                                     }}
                                 >
                                     <option value="Petrol">Petrol</option>
@@ -444,7 +501,7 @@ const page:React.FC<pageProps> = () => {
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
                                         if (Number(target.value) > 100) target.value = "100";
-                                        if (Number(target.value) < 0) target.value = "0";
+                                        if (Number(target.value) < 1) target.value = "1";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, carpoolSplit: Number(target.value)}))
                                     }}
@@ -496,7 +553,7 @@ const page:React.FC<pageProps> = () => {
                                     className="m-[10px] p-[5px] border border-gray-400 rounded bg-black text-white"
                                     value={newFootprintDetails.bikeFuelType}
                                     onChange={(e) => {
-                                        setNewFootprintDetails(prev=>({...prev, bikeFuelType: e.target.value}))
+                                        setNewFootprintDetails(prev=>({...prev, bikeFuelType: e.target.value as "Petrol" | "Diesel" | "CNG" | "LPG" | "Electricity" }))
                                     }}
                                 >
                                     <option value="Petrol">Petrol</option>
@@ -541,7 +598,7 @@ const page:React.FC<pageProps> = () => {
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
                                         if (Number(target.value) > 100) target.value = "100";
-                                        if (Number(target.value) < 0) target.value = "0";
+                                        if (Number(target.value) < 1) target.value = "1";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, bikepoolSplit: Number(target.value)}))
                                     }}
@@ -594,7 +651,7 @@ const page:React.FC<pageProps> = () => {
                                     value={newFootprintDetails.trainDistance}
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
-                                        if (Number(target.value) > 100) target.value = "100";
+                                        if (Number(target.value) > 100000) target.value = "100000";
                                         if (Number(target.value) < 0) target.value = "0";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, trainDistance: Number(target.value)}))
@@ -617,7 +674,7 @@ const page:React.FC<pageProps> = () => {
                                     value={newFootprintDetails.autoDistance}
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
-                                        if (Number(target.value) > 100) target.value = "100";
+                                        if (Number(target.value) > 100000) target.value = "100000";
                                         if (Number(target.value) < 0) target.value = "0";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, autoDistance: Number(target.value)}))
@@ -632,7 +689,7 @@ const page:React.FC<pageProps> = () => {
                         </div>
                         <div className='ml-[20px] flex flex-row'>
                             <div className='font-sans flex items-center'>
-                                Split between :
+                                Auto Split :
                             </div>
                             <div className='flex items-center'>
                                 <input 
@@ -640,8 +697,8 @@ const page:React.FC<pageProps> = () => {
                                     value={newFootprintDetails.autoSplit}
                                     onChange = {(e) =>{
                                         const target = e.target as HTMLInputElement;
-                                        if (Number(target.value) > 100) target.value = "100";
-                                        if (Number(target.value) < 0) target.value = "0";
+                                        if (Number(target.value) > 100000) target.value = "100000";
+                                        if (Number(target.value) < 1) target.value = "1";
                                         e.target.value = `${Number(e.target.value)}`;
                                         setNewFootprintDetails(prev=>({...prev, autoSplit: Number(target.value)}));
 
@@ -693,7 +750,7 @@ const page:React.FC<pageProps> = () => {
                                     className="m-[10px] p-[5px] border border-gray-400 rounded bg-black text-white"
                                     value={newFootprintDetails.airMode}
                                     onChange={(e) => {
-                                        setNewFootprintDetails(prev=>({...prev, airMode: e.target.value}))
+                                        setNewFootprintDetails(prev=>({...prev, airMode: e.target.value as "Economy" | "Premium Economy" | "Business" | "First"}))
                                     }}
                                 >
                                     <option value="Economy">Economy</option>
