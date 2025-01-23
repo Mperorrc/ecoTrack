@@ -51,6 +51,16 @@ const BarChart:React.FC<BarChartProps> = ({titleText,chartLabels,legendPosition,
                     text: (titleText && titleText.length )? titleText : "",
                     color: 'white'
                 },
+                datalabels: {
+                    display: true,
+                    color: 'white',
+                    align: 'center', 
+                    anchor: 'center', 
+                    font: {
+                        weight: 'bold',
+                        size: 14,
+                    },
+                },
             },
             scales: {
                 x: {

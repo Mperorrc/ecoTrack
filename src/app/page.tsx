@@ -2,6 +2,7 @@
 import { authModalState } from "@/atoms/authModalAtom";
 import CircularCarousel from "@/components/Carousel/CircularCarousel";
 import BarChart from "@/components/Charts/BarChart";
+import PieChart from "@/components/Charts/PieChart";
 import AuthModal from "@/components/Modals/AuthModal";
 import Navbar from "@/components/Navbar/Navbar";
 import { useRecoilValue } from "recoil";
@@ -9,7 +10,6 @@ import { useRecoilValue } from "recoil";
 export default function Home() {
   
   const authModal = useRecoilValue(authModalState);
-  const labels = ["Person 1", "Person 2", "Person 3", "Person 4"];
 
   const dataArray = [
     {
@@ -126,6 +126,27 @@ export default function Home() {
       },
     ],
   }
+
+  const familyChartLabels = ['John (Parent 1)', 'Sarah (Parent 2)', 'Emily (Kid 1)', 'Jack (Kid 2)'];
+
+  const familyChartDatasets = [
+    {
+      data: [250, 230, 120, 110], 
+      backgroundColor: ['#1E88E5', '#D81B60', '#FFC107', '#43A047'], // Muted dark theme colors
+      borderColor: '#212121', // Dark gray border
+      borderWidth: 1,
+    },
+  ];
+  
+  const monthlyChartLabels = ['Fuel', 'Electricity', 'Land Transport', 'Air Travel'];
+  const monthlyChartDatasets = [
+    {
+      data: [320, 360, 100, 150], 
+      backgroundColor: ['#FB8C00', '#8E24AA', '#3949AB', '#00ACC1'], // Darker neon-style colors
+      borderColor: '#212121', // Dark gray border
+      borderWidth: 1,
+    },
+  ];
   
   return (
     <div>
@@ -159,7 +180,39 @@ export default function Home() {
             <CircularCarousel dataArray={dataArray}/>
           </div>
         </div>
-        <div className="w-1/2 h-2/5">
+        <div className="w-[80%] ml-[10%] mt-[40px] h-4/5 flex flex-col mb-[30px]  bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg p-6 shadow-md ">
+          <div className="flex h-[20%] justify-center items-center text-lg font-light font-serif w-full">
+            Take the first step towards tracking and reducing your carbon emissions from fuel and travel. Together, we can work towards a carbon-neutral future.
+          </div>
+          <div className="w-full h-[80%] flex flex-row">
+            <div className="w-1/2 h-full flex justify-center">
+              <PieChart
+                chartLabels={familyChartLabels}
+                ChartDatasets={familyChartDatasets}
+                legendPosition="bottom"
+                titleText="Family Carbon Footprint"
+              />
+            </div>
+            <div className="w-1/2 h-full flex justify-center">
+              <PieChart
+                chartLabels={monthlyChartLabels}
+                ChartDatasets={monthlyChartDatasets}
+                legendPosition="bottom"
+                titleText="Monthly Carbon Footprint"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="w-[90%] ml-[5%] mt-[30px] flex text-center items-center p-[2%] text-4xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-600 to-green-300 ">
+          Community Events
+        </div>
+        <div className="w-[80%] ml-[10%] mt-[10px] flex flex-col mb-[30px]  bg-gradient-to-b from-gray-900 to-gray-800 rounded-lg p-6 shadow-md ">
+          <div className="flex justify-center items-center text-lg font-light font-serif w-full">
+          Join community events worldwide and earn karma points. Organize environmental clean-ups or awareness campaigns in your city and connect with participants here to make a positive impact and help create a better world.
+          </div>
+          <div className="w-full flex flex-row">
+            
+          </div>
         </div>
       </div>
     </div>

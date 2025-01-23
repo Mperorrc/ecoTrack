@@ -43,6 +43,15 @@ const Navbar:React.FC<NavbarProps> = () => {
         }
     }
 
+    const handleCommunitiesNavigation = ()=>{
+        if(user?.uid){
+            router.push("/Communities");
+        }
+        else{
+            handleClick();
+        }
+    }
+
     return (
         <div className="flex justify-between items-center h-[8vh] px-6 md:px-12 bg-[#121212] overflow-x-auto ">
             <div className="basis-1/2 flex items-center font-extrabold sm:text-lg text-green-600  ">
@@ -57,10 +66,10 @@ const Navbar:React.FC<NavbarProps> = () => {
                     Chatbot
                 </div>
                 <div 
-                    onClick={handleFootprintNavigation}
+                    onClick={handleCommunitiesNavigation}
                     className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base bg-gradient-to-r from-purple-600 via-blue-900 to-pink-900 text-white rounded-xl py-2"
                 >
-                    Add Travels
+                    Communities
                 </div>
                 <div 
                     onClick={handleFootprintNavigation}
