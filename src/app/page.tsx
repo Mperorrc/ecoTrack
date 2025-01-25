@@ -154,7 +154,7 @@ export default function Home() {
       {authModal.isOpen && <AuthModal/>}
       <div className="text-white h-[92vh]  overflow-y-auto  font-bold scrollbar-thin scrollbar-thumb-rounded-lg scrollbar-thumb-scroll-thumb scrollbar-track-scroll-track">
         <div className="w-full mt-[40px] flex text-center items-center justify-center p-[2%] text-4xl font-sans font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-green-600 to-green-300 ">
-          Track your carbon foorprint better with EcoTrack
+          Track your carbon footprint better with EcoTrack
         </div>
         <div className="w-full flex flex-col items-center justify-center">
           <div className="w-full flex flex-col items-center justify-center ">

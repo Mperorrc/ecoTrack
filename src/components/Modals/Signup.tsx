@@ -42,37 +42,31 @@ const Signup:React.FC = () => {
             if(inputs.password!==inputs.resetPassword){
                 throw new Error("Passwords dont match");   
             }
-            console.log("1")
+
             console.log(inputs)
             const newUser = await createUserWithEmailAndPassword(inputs.email,inputs.password);
-            console.log("2")
+
             console.log(newUser)
             if(!newUser){
                 throw new Error("User Creation Failed!");
             }
-            console.log("3")
             
             const userData = {
-                uid: newUser.user.uid,
+                user_uid: newUser.user.uid,
                 displayName: inputs.username,
                 email: newUser.user.email,
                 createdAt: Date.now(),
                 updatedAt: Date.now(),
                 groupId: null
             }
-            console.log("4")
             
             await setDoc(doc(firestore,"users",newUser.user.uid), userData);
-            console.log("5")
             handleClick();
-            console.log("8")
             toast.dismiss("signUpLoadingToast");
             toast.success("User "+inputs.username+" registered successfully",{position:"top-center", toastId:"signUpSuccessToast" ,autoClose:6000, theme:"dark"})
         } catch (error:any) {
             toast.dismiss("signUpLoadingToast");
             toast.error(error.message, {position:"top-center", autoClose:3000, theme:"dark"});
-            console.log("6")
-            console.log(error)
         }
     }
 

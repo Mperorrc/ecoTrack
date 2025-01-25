@@ -52,10 +52,16 @@ const Navbar:React.FC<NavbarProps> = () => {
         }
     }
 
+    const handleLandingPageNav = () =>{
+        router.push("/");
+    }
+
     return (
         <div className="flex justify-between items-center h-[8vh] px-6 md:px-12 bg-[#121212] overflow-x-auto ">
             <div className="basis-1/2 flex items-center font-extrabold sm:text-lg text-green-600  ">
-                <div className="hover:cursor-pointer text-2xl tracking-wider">EcoTrack</div>
+                <div className="hover:cursor-pointer text-2xl tracking-wider"
+                    onClick={handleLandingPageNav}
+                >EcoTrack</div>
             </div>
             
             <div className="flex justify-center gap-x-4 basis-1/2 flex-1 items-center">
