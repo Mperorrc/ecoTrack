@@ -52,6 +52,15 @@ const Navbar:React.FC<NavbarProps> = () => {
         }
     }
 
+    const handleChatbotNav = ()=>{
+        if(user?.uid){
+            router.push("/chatbot");
+        }
+        else{
+            handleClick();
+        }
+    }
+
     const handleLandingPageNav = () =>{
         router.push("/");
     }
@@ -66,7 +75,7 @@ const Navbar:React.FC<NavbarProps> = () => {
             
             <div className="flex justify-center gap-x-4 basis-1/2 flex-1 items-center">
                 <div 
-                    onClick={handleFootprintNavigation}
+                    onClick={handleChatbotNav}
                     className="hover:cursor-pointer h-[70%] m-2 flex-1 flex items-center justify-center text-center sm:text-sm md:text-base bg-gradient-to-r from-purple-600 via-blue-900 to-pink-900 text-white rounded-xl py-2"
                 >
                     Chatbot
