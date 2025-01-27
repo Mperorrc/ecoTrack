@@ -28,6 +28,12 @@ const PieChart: React.FC<PieChartProps> = ({ titleText, chartLabels, legendPosit
 
         setChartOptions({
             responsive: true,
+            // layout: {
+            //     padding: {
+            //       top: 100, // Space between the title and the pie chart
+            //       bottom: 100, // Space between the pie chart and the legend
+            //     },
+            // },
             plugins: {
                 legend: {
                     display: true, // Display the legend (region labels)
@@ -35,11 +41,13 @@ const PieChart: React.FC<PieChartProps> = ({ titleText, chartLabels, legendPosit
                     labels: {
                         color: 'white', // Set the legend text color to white
                     },
+                    // padding:50,
                 },
                 title: {
                     display: titleText && titleText.length > 0,
                     text: titleText || '',
                     color: 'white',
+                    // padding:50,
                 },
                 tooltip: {
                     callbacks: {
@@ -56,6 +64,8 @@ const PieChart: React.FC<PieChartProps> = ({ titleText, chartLabels, legendPosit
                 datalabels: {
                     display: true, 
                     color: 'white',
+                    // anchor: 'end',
+                    // align: 'end',
                     formatter: (value: number, context: any) => {
                         const dataset = context.chart.data.datasets[0].data;
                         const total = dataset.reduce((sum: number, val: number) => sum + val, 0);

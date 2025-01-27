@@ -53,12 +53,20 @@ function computeCarbonFootprint(
     console.log(carFootprint);
     console.log(bikeFootprint);
     console.log(busFootprint);
-    console.log("BUSSSSSS"+ 0.016*40)
     console.log(trainFootprint);
     console.log(autoFootprint);
     console.log(airTravel);
 
-    return electricityFootprint + fuelFootprint + carFootprint + bikeFootprint + busFootprint + trainFootprint + autoFootprint + airTravel;
+    const footprintValueDetails = {
+        totalValue:parseFloat((electricityFootprint + fuelFootprint + carFootprint + bikeFootprint + busFootprint + trainFootprint + autoFootprint + airTravel).toFixed(2)),
+        electricityFootprint:parseFloat((electricityFootprint).toFixed(2)),
+        fuelFootprint:parseFloat(fuelFootprint.toFixed(2)),
+        vehicularFootprint: parseFloat((carFootprint + bikeFootprint).toFixed(2)),
+        publicTransportFootprint:  parseFloat((busFootprint + trainFootprint + autoFootprint).toFixed(2)),
+        airTravelFootprint: parseFloat(airTravel.toFixed(2))
+    }
+
+    return footprintValueDetails;
 }
 
 export default computeCarbonFootprint;

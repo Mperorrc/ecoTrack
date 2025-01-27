@@ -183,13 +183,12 @@ const page:React.FC<pageProps> = () => {
     const handleCalculate = async function(){
         if(loadDataprocessing || saveDataprocessing || calculateDataprocessing) return;
         setCalculateDataProcessing(true);
-        const carbonFootprint = computeCarbonFootprint(
+        const {totalValue} = computeCarbonFootprint(
             newFootprintDetails
         );
         
-        const roundedCarbonFootprint = parseFloat(carbonFootprint.toFixed(2));
         toast.dismiss();
-        toast.success(`Carbon footprint Output: ${roundedCarbonFootprint}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 4000, theme: "dark" });
+        toast.success(`Carbon footprint Output: ${totalValue}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 4000, theme: "dark" });
         setCalculateDataProcessing(false);
     }
 
@@ -205,7 +204,7 @@ const page:React.FC<pageProps> = () => {
             console.log(newFootprintDetails);
             const querySnapshot = await getDocs(
                 query(
-                    collection(firestore, "FOOTPRINT_DATA"),
+                    collection(firestore, "CARBON_FOOTPRINT_USER_DATA"),
                     where("user_uid", "==", user.uid),
                     where("footprintDetails.month", "==", newFootprintDetails.month),
                     where("footprintDetails.year", "==", newFootprintDetails.year)
@@ -237,14 +236,10 @@ const page:React.FC<pageProps> = () => {
             return;
         }
         setSaveDataProcessing(true);
-        const carbonFootprint = computeCarbonFootprint(
+        const {totalValue, electricityFootprint,fuelFootprint,vehicularFootprint,publicTransportFootprint,airTravelFootprint} = computeCarbonFootprint(
             newFootprintDetails
         );
-
-        const roundedCarbonFootprint = parseFloat(carbonFootprint.toFixed(2));
-        
-        console.log(roundedCarbonFootprint)
-        
+                
         try {
             const querySnapshot = await getDocs(
                 query(
@@ -256,28 +251,36 @@ const page:React.FC<pageProps> = () => {
             );
             console.log(querySnapshot?.docs?.length)
             if (querySnapshot?.docs?.length) {
-                console.log("old");
                 const existingDoc = querySnapshot.docs[0];
                 const docRef = doc(firestore, "CARBON_FOOTPRINT_USER_DATA", existingDoc.id);
     
                 await updateDoc(docRef, {
-                    "footprintValue": roundedCarbonFootprint,
-                    "updatedAt": Date.now(),
+                    totalValue:totalValue, 
+                    electricityFootprint:electricityFootprint,
+                    fuelFootprint:fuelFootprint,
+                    vehicularFootprint:vehicularFootprint,
+                    publicTransportFootprint:publicTransportFootprint,
+                    airTravelFootprint:airTravelFootprint,
+                    updatedAt: Date.now(),
                 });
             }
             else{
-                console.log("new");
                 const carbonFootprintData = {
                     user_uid: user.uid,
                     footprintDetails: newFootprintDetails,
-                    footprintValue: roundedCarbonFootprint,
+                    totalValue:totalValue, 
+                    electricityFootprint:electricityFootprint,
+                    fuelFootprint:fuelFootprint,
+                    vehicularFootprint:vehicularFootprint,
+                    publicTransportFootprint:publicTransportFootprint,
+                    airTravelFootprint:airTravelFootprint,
                     createdAt: Date.now(),
                     updatedAt: Date.now(),
                 }
                 
                 await addDoc(collection(firestore, "CARBON_FOOTPRINT_USER_DATA"), carbonFootprintData);
             }
-            toast.success(`Carbon footprint Output in ${newFootprintDetails.month} ${newFootprintDetails.year}: ${roundedCarbonFootprint}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
+            toast.success(`Carbon footprint Output in ${newFootprintDetails.month} ${newFootprintDetails.year}: ${totalValue}kgCO2`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
         } catch (error:any) {
             toast.error("Couldn't save the carbon footprint Value", {position:"top-center", autoClose:2000, theme:"dark"});
             console.log(error)
@@ -1129,7 +1132,7 @@ const page:React.FC<pageProps> = () => {
                 </button>
             </div>
             <div className="w-[95%] m-auto mt-[60px] flex flex-col items-center font-mono font-bold text-xl space-y-6 p-6 rounded-2xl shadow-lg text-white">
-                <div className="text-2xl text-green-700 underline mb-4 w-full ">Your Rides</div>
+                <div className="text-2xl text-green-700 underline mb-4 w-full flex items-center justify-center ">Your Rides</div>
                 {userRides.map((ride) => (
                     <div
                         key={ride.id}
