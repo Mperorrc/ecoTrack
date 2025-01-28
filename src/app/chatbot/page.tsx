@@ -49,63 +49,15 @@ const Page: React.FC<PageProps> = () => {
 
     return (
         <div className="bg-gray-900 h-[92vh] flex flex-row p-4">
-            <div className="bg-gray-800 rounded-lg w-[30%] shadow-lg flex flex-col">
-                <h2 className=" text-2xl m-4 font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-400 flex items-center justify-center">EcoTrackBot</h2>
-                <div className='text-white'>
-                    New Chat
-                </div>
-            </div>
-            <div className="bg-gray-800 rounded-lg w-[78.75%] ml-[1.25%] shadow-lg">
-                <div className="h-[70%] w-full bg-gray-800 rounded-lg shadow-lg flex flex-col overflow-y-auto">
-                    {messages.map((message, index) => (
-                        <React.Fragment key={index}>
-                            {/* Input Message */}
-                            {message.input?.length > 0 && (
-                                <div
-                                    className="flex ml-[40%] w-[50%] mr[10%] my-[2.5%] p-4 text-white break-words overflow-x-hidden bg-gray-600 rounded-lg"
-                                    style={{
-                                        wordBreak: "break-word",
-                                        overflowWrap: "break-word",
-                                    }}
-                                >
-                                    {message.input}
-                                </div>
-                            )}
-                            
-                            {/* Output Message */}
-                            {message.output?.length > 0 && (
-                                <div
-                                    className="flex justify-center w-[70%] m-[2.5%] text-white break-words overflow-x-hidden bg-gray-600 rounded-lg"
-                                    style={{
-                                        wordBreak: "break-word",
-                                        overflowWrap: "break-word",
-                                    }}
-                                >
-                                    {message.output}
-                                </div>
-                            )}
-                        </React.Fragment>
-                    ))}
-                </div>
-                <div className='h-[30%] w-full bg-gray-800 rounded-lg shadow-lg flex flex-col'>
-                    <textarea
-                        value={inputText}
-                        onChange={handleInputChange}
-                        className="w-[95%] mx-[2.5%] h-24 p-4 bg-gray-700 text-white border border-gray-600 rounded-lg resize-none focus:outline-none"
-                        placeholder="Type your message here..."
-                        maxLength={maxTokens}
-                    />
-                    <div className="flex m-4 justify-between flex-row items-center mt-4 text-white text-sm">
-                        <span>Characters: {tokenCount}/{maxTokens}</span>
-                        <button
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                            disabled={tokenCount === 0 || tokenCount > maxTokens}
-                            onClick={handleSend}
-                        >
-                            Send
-                        </button>
-                    </div>
-                </div>
+            <div className="h-full w-[90%] ml-[5%]">
+                <iframe
+                    src="https://www.chatbase.co/chatbot-iframe/uTri2MLOiFDtepEHlXppT"
+                    width="100%"
+                    height={'100%'}
+                    
+                    // style="height: 100%; min-height: 700px"
+                    // frameborder="0"
+                ></iframe>
             </div>
         </div>
     );

@@ -5,7 +5,7 @@ import {useCreateUserWithEmailAndPassword} from 'react-firebase-hooks/auth'
 import { auth, firestore } from '@/firebase/firebase';
 import Link from 'next/link';
 import { toast } from 'react-toastify';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 
 
 const Signup:React.FC = () => {
@@ -43,14 +43,25 @@ const Signup:React.FC = () => {
                 throw new Error("Passwords dont match");   
             }
 
+            const querySnapshot = await getDocs(
+                query(
+                    collection(firestore, "users"),
+                    where("displayName", "==", inputs.username),
+                )
+            );
+            
+            if(querySnapshot?.docs?.length){
+                throw new Error("This username already exists!")
+            }
+
             console.log(inputs)
             const newUser = await createUserWithEmailAndPassword(inputs.email,inputs.password);
 
             console.log(newUser)
             if(!newUser){
                 throw new Error("User Creation Failed!");
-            }
-            
+            }           
+
             const userData = {
                 user_uid: newUser.user.uid,
                 displayName: inputs.username,

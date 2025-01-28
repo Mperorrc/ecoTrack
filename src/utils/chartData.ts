@@ -4,7 +4,8 @@ export const dataArray = [
     datasets: [
       {
         label: "Average Electricity Footprint (kgCO2)",
-        data: [220, 180, 200, 210],  // Example values
+        // data: [220, 180, 200, 210],  // Example values
+        data: [22000, 18, 20, 2100],  // Example values
         backgroundColor: [
           "rgba(255, 0, 0, 0.5)",  // Red for electricity
           "rgba(255, 255, 0, 0.5)",  // Yellow for electricity

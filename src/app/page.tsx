@@ -225,7 +225,7 @@ export default function Home() {
         return;
       }
       console.log(groupUsers)
-
+      let arrayToBeInserted = [];
       for (let groupUser of groupUsers) {  // Use 'for...of' to loop through array
         const userSnap = await getDocs(
           query(
@@ -303,16 +303,16 @@ export default function Home() {
           );
           if(calculated_months==0) calculated_months+=1;
           const monthlyAveragedata = {
-            electricityFootprint:monthyFootprintValues.electricityFootprint/calculated_months,
-            fuelFootprint:monthyFootprintValues.fuelFootprint/calculated_months,
-            vehicularFootprint:monthyFootprintValues.vehicularFootprint/calculated_months,
-            publicTransportFootprint:monthyFootprintValues.publicTransportFootprint/calculated_months,
-            airTravelFootprint:monthyFootprintValues.airTravelFootprint/calculated_months,
-            totalValue:monthyFootprintValues.totalValue/calculated_months,
+            electricityFootprint:parseFloat((monthyFootprintValues.electricityFootprint/calculated_months).toFixed(2)),
+            fuelFootprint:parseFloat((monthyFootprintValues.fuelFootprint/calculated_months).toFixed(2)),
+            vehicularFootprint:parseFloat((monthyFootprintValues.vehicularFootprint/calculated_months).toFixed(2)),
+            publicTransportFootprint:parseFloat((monthyFootprintValues.publicTransportFootprint/calculated_months).toFixed(2)),
+            airTravelFootprint:parseFloat((monthyFootprintValues.airTravelFootprint/calculated_months).toFixed(2)),
+            totalValue:parseFloat((monthyFootprintValues.totalValue/calculated_months).toFixed(2)),
             userDisplayName:groupUser
           };
-
-          setGroupUsersFootprintData((prevData) => [...prevData, monthlyAveragedata]);
+          arrayToBeInserted.push(monthlyAveragedata);
+          
           console.log(displayName)
           console.log(monthlyAveragedata);
         }
@@ -320,6 +320,7 @@ export default function Home() {
           setGroupUsersFootprintData([]);
         }
       }
+      setGroupUsersFootprintData(arrayToBeInserted);
     }
     catch(error){
       console.log("Couldn't load group data" + error)
@@ -335,58 +336,63 @@ export default function Home() {
       "#9C27B0", "#03A9F4" // Add more colors if needed for up to 16 people
     ];
 
+    console.log(monthlyAveragedataArray);
+
     // Generate the dataset for each category
-    const electricityData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.electricityFootprint],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
-      borderWidth: 1,
-    }));
+    const electricityData = [
+      {label: "Average Electricity Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.electricityFootprint])),
+      backgroundColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderWidth: 1,}
+    ];
 
-    const fuelData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.fuelFootprint],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
+    const fuelData = [{
+      label: "Average Fuel Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.fuelFootprint])),
+      backgroundColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
       borderWidth: 1,
-    }));
+    }];
 
-    const vehicularData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.vehicularFootprint],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
+    const vehicularData = [{
+      label: "Average Vehicular Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.vehicularFootprint])),
+      backgroundColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderColor:monthlyAveragedataArray.map((data:any, index:any) => ( colors[index % colors.length])),
       borderWidth: 1,
-    }));
+    }];
 
-    const publicTransportData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.publicTransportFootprint],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
+    const publicTransportData =[{
+      label: "Average Public Transport Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.publicTransportFootprint])),
+      backgroundColor:monthlyAveragedataArray.map((data:any, index:any) => ( colors[index % colors.length])),
+      borderColor:monthlyAveragedataArray.map((data:any, index:any) => ( colors[index % colors.length])),
       borderWidth: 1,
-    }));
+    }];
 
-    const airTravelData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.airTravelFootprint],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
+    const airTravelData = [{
+      label: "Average air travel Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.airTravelFootprint])),
+      backgroundColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
       borderWidth: 1,
-    }));
+    }];
 
-    const totalData = monthlyAveragedataArray.map((data:any, index:any) => ({
-      label: data.userDisplayName || `Person ${index + 1}`,
-      data: [data.totalValue],
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
+    const totalData = [{
+      label: "Average monthly carbon Footprint (kgCO2)",
+      data: monthlyAveragedataArray.map((data:any, index:any) => ([data.totalValue])),
+      backgroundColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
+      borderColor: monthlyAveragedataArray.map((data:any, index:any) => (colors[index % colors.length])),
       borderWidth: 1,
-    }));
+    }];
 
     // Final dataset to be returned for each category
     const barChartCarouselData =  [
-      { labels: monthlyAveragedataArray.map((data:any) => data.userDisplayName || `Person ${data.index + 1}`), datasets: electricityData },
+      { 
+        labels: monthlyAveragedataArray.map((data:any) => data.userDisplayName || `Person ${data.index + 1}`), 
+        datasets: electricityData 
+      },
       { labels: monthlyAveragedataArray.map((data:any) => data.userDisplayName || `Person ${data.index + 1}`), datasets: fuelData },
       { labels: monthlyAveragedataArray.map((data:any) => data.userDisplayName || `Person ${data.index + 1}`), datasets: vehicularData },
       { labels: monthlyAveragedataArray.map((data:any) => data.userDisplayName || `Person ${data.index + 1}`), datasets: publicTransportData },
@@ -432,7 +438,7 @@ export default function Home() {
   }, [userCarbonMonthlyData]);
 
   useEffect(() => {
-    console.log("HIIIIIIIII")
+    console.log("HIIIIIIIII GRP")
     console.log(groupUsersFootprintData)
     if(!groupUsersFootprintData?.length) setCarouselData([]);
     else getBarChartData(groupUsersFootprintData);
