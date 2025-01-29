@@ -151,7 +151,7 @@ const page:React.FC<pageProps> = () => {
                 query(
                     collection(firestore, "SCHEDULED_RIDE_DATA"),
                     where("user_uid", "==", user.uid),
-                    orderBy("createdAt","desc")
+                    orderBy("createdAt", "desc")
                 )
             );
             console.log("Entered");
@@ -166,7 +166,7 @@ const page:React.FC<pageProps> = () => {
                     rideDays:doc.data().rideDays,
                     start_time: doc.data().start_time,
                     status: doc.data().status,
-                }));
+                })).filter(ride => ride.status !== "Single" && ride.status !== "deleted");
                 console.log(rides);
                 setUserRides(rides);
             }
@@ -328,6 +328,17 @@ const page:React.FC<pageProps> = () => {
 
                 
             await addDoc(collection(firestore, "SCHEDULED_RIDE_DATA"), rideData);
+
+            const docRef = await addDoc(collection(firestore, "SCHEDULED_RIDE_DATA"), rideData);
+            const docId = docRef.id;
+
+            const ride_logs = {
+                user_uid: user?.uid,
+                ride_id: docId,
+                status_log:'Created',
+                createdAt: Date.now(),
+            }
+            await addDoc(collection(firestore, "RIDE_DATA_LOGS"), ride_logs);
             toast.success(`Ride details added`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
 
             setLocation({
@@ -366,6 +377,15 @@ const page:React.FC<pageProps> = () => {
             await updateDoc(eventDocRef, {
                 status: status,
             });
+
+            const ride_logs = {
+                user_uid: user?.uid,
+                ride_id: rideId,
+                status_log:status,
+                createdAt: Date.now(),
+            }
+            await addDoc(collection(firestore, "RIDE_DATA_LOGS"), ride_logs);
+
             setUserRides((prevRides) =>
                 prevRides.map((user_ride) =>
                     user_ride.id === rideId
@@ -409,11 +429,19 @@ const page:React.FC<pageProps> = () => {
                 return;
             }
             
+                    
+            const eventDocRef = doc(firestore, "SCHEDULED_RIDE_DATA", rideId);
+            await updateDoc(eventDocRef, {
+                status: 'deleted',
+            });
             
-            const rideDocRef = doc(firestore, "SCHEDULED_RIDE_DATA", rideId);
-            
-            
-            await deleteDoc(rideDocRef);
+            const ride_logs = {
+                user_uid: user?.uid,
+                ride_id: rideId,
+                status_log:'deleted',
+                createdAt: Date.now(),
+            }
+            await addDoc(collection(firestore, "RIDE_DATA_LOGS"), ride_logs);
             
             
             setUserRides((prevRides) =>
@@ -436,6 +464,85 @@ const page:React.FC<pageProps> = () => {
             });
         }
     };
+
+    const handleAddSingleRide = async() =>{
+        if(!location.start || !location.end || !rideStartTime || !selectedDays?.length){
+            toast.error("All the fields are necessary",{
+                position:'top-center',
+                autoClose:2000,
+                theme:'dark'
+            });
+            return;
+        }
+
+        if(selectedDays.length>1){
+            toast.error("Only one day can be chosen while adding a  single ride",{
+                position:'top-center',
+                autoClose:2000,
+                theme:'dark'
+            });
+            return;
+        }
+
+        if(!user?.uid){
+            toast.error("User logged out. Please log in again",{
+                position:'top-center',
+                autoClose:2000,
+                theme:'dark'
+            });
+            return;
+        }
+
+        try {
+            const rideData = {
+                user_uid: user?.uid,
+                start_address: location.start,
+                end_address: location.end,
+                start_lat: location.start_lat,
+                end_lat: location.end_lat,
+                start_lng: location.start_lng,
+                end_lng: location.end_lng,
+                mode: selectedMode,
+                start_time: rideStartTime,
+                rideDays:selectedDays,
+                status:'Single',
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            }
+            console.log(rideData);
+
+                
+            const docRef = await addDoc(collection(firestore, "SCHEDULED_RIDE_DATA"), rideData);
+            const docId = docRef.id;
+
+            const ride_logs = {
+                user_uid: user?.uid,
+                ride_id: docId,
+                status_log:'Created',
+                createdAt: Date.now(),
+            }
+            await addDoc(collection(firestore, "RIDE_DATA_LOGS"), ride_logs);
+
+            toast.success(`Ride details added`, { position: "top-center", toastId: "signUpSuccessToast", autoClose: 2000, theme: "dark" });
+
+            setLocation({
+                start:'',
+                end:'',
+                start_lat:0,
+                start_lng:0,
+                end_lat:0,
+                end_lng:0
+            });
+            setSelectedMode("Car");
+            setSelectedDays([]);
+            setRideStartTime("");
+            // fetchRides();
+        }
+        catch (error:any) {
+            toast.error("Couldn't save the ride data", {position:"top-center", autoClose:2000, theme:"dark"});
+            console.log(error)
+        }
+    }
       
 
     return(
@@ -1103,9 +1210,9 @@ const page:React.FC<pageProps> = () => {
                 </div>
 
 
-                <div className="flex flex-col items-start w-full">
-                    <label className="text-lg mb-2 mx-2 p-2 text-gray-100">Frequency</label>
-                    <div className="flex flex-row mx-2 p-2 flex-wrap gap-4">
+                <div className="flex flex-col justify-start w-full">
+                    <label className="text-lg mb-2 mx-2 px-2 text-gray-100">Set Frequency</label>
+                    <div className="flex flex-row mx-2 mt-4 px-2 flex-wrap gap-4">
                     {["M", "T", "W", "Th", "F", "Sa", "S"].map((day) => (
                         <div key={day} className="flex items-center space-x-2">
                         <input
@@ -1121,15 +1228,27 @@ const page:React.FC<pageProps> = () => {
                         </label>
                         </div>
                     ))}
+                    <button className=" px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        onClick={handleAddRide}
+                    >
+                        Add Ride
+                    </button>
+                    
+                    </div>
+                    <div className='w-full mt-[20px] flex flex-row'>
+                        <div className='mx-2 mt-3 px-2 text-gray-100'>
+                            Or Instead :
+                        </div>
+                        <button className=" px-6 mx-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                            onClick={handleAddSingleRide}
+                        >
+                            Add Single Ride
+                        </button>
                     </div>
                 </div>
 
 
-                <button className="mt-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                    onClick={handleAddRide}
-                >
-                    Add Ride
-                </button>
+                
             </div>
             <div className="w-[95%] m-auto mt-[60px] flex flex-col items-center font-mono font-bold text-xl space-y-6 p-6 rounded-2xl shadow-lg text-white">
                 <div className="text-2xl text-green-700 underline mb-4 w-full flex items-center justify-center ">Your Rides</div>

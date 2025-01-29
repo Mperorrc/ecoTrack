@@ -434,11 +434,94 @@ const Communities: React.FC<CommunitiesProps> = () => {
             }
         }
 
+
+        const selectedEvent = events.find(event => event.eventId === selectedStatus.eventId);
+
+        if(selectedStatus.status == "Completed" && selectedEvent.status != "Running"){
+            setShowModal(false);
+            toast.error("Event must be running to complete it",{position:"top-center", autoClose:3000, theme:"dark"});
+            return;
+        }
+
+        let karmaPoints = selectedEvent.upvotes - selectedEvent.downvotes;
+        
+        if(selectedEvent.downvotes>selectedEvent.upvotes){
+            karmaPoints = -selectedEvent.downvotes;
+        }
+
         try {
+            
+            if(selectedStatus.status == "Completed"){
+
+                const querySnapshot = await getDocs(
+                    query(
+                        collection(firestore, "users"),
+                        where("user_uid", "==", user?.uid)
+                    )
+                );
+                
+                if (!querySnapshot?.docs?.length) {
+                    toast.error('We ran into an error. Please try again later', {
+                        position: "top-center",
+                        toastId: "signUpLoadingToast",
+                        autoClose: 3000,
+                        theme: "dark"
+                    });
+                    setShowModal(false);
+                    return;
+                }
+
+                const userDoc = querySnapshot.docs[0];
+                const userRef = userDoc.ref; // Reference to the user's document
+                const currentKarma = userDoc.data().karma || 0; // Get the current karma, defaulting to 0 if not set
+
+                const updatedKarma = currentKarma + karmaPoints; // Adding karmaPoints to the current karma
+
+                await updateDoc(userRef, {
+                    karma: updatedKarma
+                });      
+                
+                const enrolledUsers = selectedEvent.enrolled_users; // Array of uids
+
+                for (const uid of enrolledUsers) {
+                    // Get the user document from Firestore
+                    const querySnapshot = await getDocs(
+                        query(
+                            collection(firestore, "users"),
+                            where("user_uid", "==", uid)
+                        )
+                    );
+
+                    if (querySnapshot?.docs?.length) {
+                        const userDoc = querySnapshot.docs[0];
+                        const userRef = userDoc.ref; // Reference to the user's document
+                        const currentKarma = userDoc.data().karma || 0; // Get the current karma, defaulting to 0 if not set
+
+                        const updatedKarma = currentKarma + 3; // Increase karma by 5
+
+                        // Update the karma field for the user
+                        await updateDoc(userRef, {
+                            karma: updatedKarma
+                        });
+
+                        // Optionally, you can log or show a success toast for each user
+                        console.log(`User ${uid} karma updated to ${updatedKarma}`);
+                    } else {
+                        console.log(`No user found with uid ${uid}`);
+                    }
+                }
+
+
+
+            }
+            
             const eventDocRef = doc(firestore, "EVENT_DATA", selectedStatus.eventId);
             await updateDoc(eventDocRef, {
                 status: selectedStatus.status,
             });
+
+            
+
             setEvents((prevEvents) =>
                 prevEvents.map((event) =>
                 event.id === selectedStatus.eventId
